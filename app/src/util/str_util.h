@@ -31,6 +31,11 @@ strquote(const char *src);
 bool
 parse_integer(const char *s, long *out);
 
+// parse s as an integer into a 64-bit value
+// returns true if the conversion succeeded, false otherwise
+bool
+parse_64bit_integer(const char *s, long long *out);
+
 // parse s as integers separated by sep (for example '1234:2000')
 // returns the number of integers on success, 0 on failure
 size_t

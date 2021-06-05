@@ -213,6 +213,9 @@ scrcpy_print_usage(const char *arg0) {
         "        Set the initial window height.\n"
         "        Default is 0 (automatic).\n"
         "\n"
+        "    --window-native-handle value\n"
+        "        Use the existing native window, instead of spawning a new one.\n"
+        "\n"
         "Shortcuts:\n"
         "\n"
         "    In the following list, MOD is the shortcut modifier. By default,\n"
@@ -450,6 +453,19 @@ parse_window_dimension(const char *s, uint16_t *dimension) {
 }
 
 static bool
+parse_window_native_handle(const char *s, void* native_window_handle) {
+    long long value;
+    bool ok = parse_64bit_integer(s, &value);
+    
+    if (!ok) {
+        return false;
+    }
+
+    *native_window_handle = (void*)value;
+    return true;
+}
+
+static bool
 parse_port_range(const char *s, struct sc_port_range *port_range) {
     long values[2];
     size_t count = parse_integers_arg(s, 2, values, 0, 0xFFFF, "port");
@@ -668,6 +684,7 @@ guess_record_format(const char *filename) {
 #define OPT_FORWARD_ALL_CLICKS     1023
 #define OPT_LEGACY_PASTE           1024
 #define OPT_ENCODER_NAME           1025
+#define OPT_WINDOW_NATIVE_HANDLE   1026
 
 bool
 scrcpy_parse_args(struct scrcpy_cli_args *args, int argc, char *argv[]) {
@@ -718,6 +735,8 @@ scrcpy_parse_args(struct scrcpy_cli_args *args, int argc, char *argv[]) {
         {"window-height",          required_argument, NULL, OPT_WINDOW_HEIGHT},
         {"window-borderless",      no_argument,       NULL,
                                                   OPT_WINDOW_BORDERLESS},
+        {"window-native-handle",   required_argument, NULL, 
+                                                  OPT_WINDOW_NATIVE_HANDLE},
         {NULL,                     0,                 NULL, 0  },
     };
 
@@ -842,6 +861,11 @@ scrcpy_parse_args(struct scrcpy_cli_args *args, int argc, char *argv[]) {
                 break;
             case OPT_WINDOW_BORDERLESS:
                 opts->window_borderless = true;
+                break;
+            case OPT_WINDOW_NATIVE_HANDLE:
+                if (!parse_window_native_handle(optarg, &opts->window_native_handle)) {
+                    return false;
+                }
                 break;
             case OPT_PUSH_TARGET:
                 opts->push_target = optarg;

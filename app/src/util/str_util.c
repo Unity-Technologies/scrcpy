@@ -81,6 +81,25 @@ parse_integer(const char *s, long *out) {
     return true;
 }
 
+bool
+parse_64bit_integer(const char *s, long long *out) {
+    char *endptr;
+    if (*s == '\0') {
+        return false;
+    }
+    errno = 0;
+    long long value = strtoll(s, &endptr, 0);
+    if (errno == ERANGE) {
+        return false;
+    }
+    if (*endptr != '\0') {
+        return false;
+    }
+
+    *out = value;
+    return true;
+}
+
 size_t
 parse_integers(const char *s, const char sep, size_t max_items, long *out) {
     size_t count = 0;
